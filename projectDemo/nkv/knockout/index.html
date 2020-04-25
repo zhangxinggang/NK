@@ -1,0 +1,22 @@
+<html>
+	<head>
+		<script src="https://cdn.bootcss.com/knockout/3.5.1/knockout-latest.debug.js"></script>
+	</head>
+	<body>
+		<div>
+			姓名：<label data-bind="text:Name"></label>
+			职业：<input type="text" data-bind="textinput:Profession">
+			描述：<label data-bind="text:Des"></label>
+		</div>
+		<script type="text/javascript">
+			var myViewModel={
+				Name:ko.observable('zxg'),
+				Profession:ko.observable('软件工程师')
+			};
+			myViewModel.Des=ko.dependentObservable(function(){
+				return '本人姓名'+myViewModel.Name()+'，职业'+myViewModel.Profession();
+			})
+			ko.applyBindings(myViewModel)
+		</script>
+	</body>
+</html>

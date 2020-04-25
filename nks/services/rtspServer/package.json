@@ -1,0 +1,21 @@
+{
+	"name": "rtsp_Server",
+	"version": "0.1.0",
+	"description": "This is for rtspServer project !",
+	"homepage": "/",
+	"repository": {
+		"type": "",
+		"url": ""
+	},
+	"author":{
+		"name": "zxg",
+		"email": "540752013@qq.com"
+	},
+	"license": "ISC",
+	"devDependencies":{
+		"shortid": "^2.2.14",
+		"sdp-transform": "^2.7.0",
+		"get-port": "^4.0.0",
+		"escape-string-regexp": "^1.0.5"
+	}
+}
