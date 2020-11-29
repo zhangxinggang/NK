@@ -1,3 +1,3 @@
-import config from '../config'
-import services from '../services'
+const config = require('../config')
+const services = require('../../NK')
 services(config)

@@ -1,7 +1,4 @@
 const path =require('path')
-const dotenv = require('dotenv')
-//初始化环境变量
-dotenv.config();
 module.exports = {
 	services: {
 		rtmpServer: {
@@ -45,7 +42,7 @@ module.exports = {
 				}
 			},
 			security: {
-				secret: 'zxgLN',
+				secret: 'zxgNK',
 				tokenExpiresIn: '8h',
 				noAuthorityRoutes: [
 					'/dynamic/*',
@@ -101,11 +98,11 @@ module.exports = {
 			],
 			mysql: {
 				insecureAuth: true,
-				host: process.env.db_host,
-				user: process.env.db_user,
-				password: process.env.db_password,
-				database: process.env.db_database,
-				port: process.env.db_port,
+				host: process.env.db_host || '127.0.0.1',
+				user: process.env.db_user || 'root',
+				password: process.env.db_password || '123456',
+				database: process.env.db_database || 'root',
+				port: process.env.db_port || '3306',
 				// logging:true,
 				synchronize:true,
 				multipleStatements: true,
@@ -120,7 +117,7 @@ module.exports = {
 	},
 	logger: {
 		start:true,
-		rootDir: path.join(__dirname, '/logs')
+		rootDir: path.join(process.cwd(), '/logs')
 	},
 	communication: {
 		//邮件发送【系统错误信息、邮件服务】

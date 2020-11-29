@@ -5,8 +5,7 @@
   "author": "zxg",
   "main": "start.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development npx nodemon --exec babel-node ./scripts/start.js",
-    "pro": "cross-env NODE_ENV=production npx babel-node ./scripts/start.js",
+    "dev": "npx nodemon --exec babel-node ./scripts/start.js",
     "build": "npx babel services --out-dir dist/services && npx babel scripts --out-dir dist/scripts && npx babel database --out-dir dist/database && npx babel config.js --out-dir dist  && npx babel package.json --copy-files --out-dir dist ",
     "start": "node ./dist/scripts/start.js",
     "jsdoc":"npx jsdoc -a all -c \"./doc/jsDoc/conf.js\""
@@ -70,7 +69,6 @@
   },
   "dependencies": {
     "@log4js-node/smtp": "^1.1.0",
-    "cross-env": "^7.0.2",
     "dotenv": "^8.2.0",
     "get-port": "^5.1.1",
     "glob": "^7.1.6",

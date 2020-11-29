@@ -1,11 +1,31 @@
-import logger from './utils/logger'
-import glob from 'glob'
-import path from 'path'
+const dotenv = require('dotenv')
+//初始化环境变量
+dotenv.config()
+
+const logger = require('./utils/logger')
+const request = require('./utils/request')
+const glob = require('glob')
+const path = require('path')
+const merge = require('merge')
+const config= require('../config') || {}
 //初始化
 let init=(config)=>{
 	!process.env.NODE_ENV && (process.env.NODE_ENV='production');
+	//将配置文件写进内存
+	global.NKGlobal = {config};
+	let fixVal=(originObj,newObjName,value)=>{
+		Object.defineProperty(originObj,newObjName,{
+			value:value,
+			writable:false,
+			enumerable:true,
+			configurable:false
+		})
+	}
+	fixVal(global,'$fixVal',fixVal)
 	//记录日志
 	new logger(config).init();
+	//网络请求
+	$fixVal(global,'$request',request)
 	//设置程序名称
 	process.title=(config.project && config.project.name) || 'nk';
 	//异常处理
@@ -44,25 +64,24 @@ let endingWorks=(serverNames)=>{
 		console.error(err)
 	})
 }
-export default function(config) {
-	//将配置文件写进内存
-	global.NKGlobal = {config};
+module.exports=function(pcf) {
+	pcf=pcf || {}
+	merge.recursive(config,pcf)
 	init(config);
 	let allService = [];
 	let services=config.services
 	Object.keys(services).map(item=>{
-		allService.push(new Promise((resolve, reject) => {
-			Promise.all([
-				import('./'+item)
-			]).then(([
-				server
-			])=>{
-				let serverConf=config['services'][item];
-				new server.default(serverConf).start(()=>{
-					resolve(item)
-				})
-			})
-		}))
+		let serverConf=config['services'][item];
+		if(serverConf.start){
+			try{
+				var server = require('./'+item)
+				allService.push(new Promise((resolve, reject) => {
+					new server(serverConf).start(()=>{
+						resolve(item)
+					})
+				}))
+			}catch(e){}
+		}
 	})
 	Promise.all(allService).then(function(done) {
 		endingWorks(done)

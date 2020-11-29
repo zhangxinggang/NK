@@ -1,7 +1,6 @@
-import path from 'path'
-import { configure, getLogger } from 'log4js'
-
-export default class Logger{
+const path = require('path')
+const { configure, getLogger } = require('log4js')
+class Logger{
 	constructor(config){
 		config.logger=config.logger || {};
 		config.communication=config.communication || {};
@@ -81,3 +80,4 @@ export default class Logger{
 		}
 	}
 }
+module.exports=Logger

@@ -1,9 +1,9 @@
 // https://typeorm.io
-import * as typeorm from 'typeorm'
-import glob from 'glob'
-import fs from 'fs'
-import merge from 'merge'
-import {currencyOperation} from './staticStandard'
+const typeorm = require('typeorm')
+const glob = require("glob")
+const fs = require('fs')
+const merge = require('merge')
+const {currencyOperation} = require('./staticStandard')
 
 Object.defineProperty(global,'typeorm',{
 	value:typeorm,
@@ -549,7 +549,7 @@ const magicsave=function(options,orm){
 		}
 	})
 }
-export {
+module.exports = {
 	conn,
 	otbExec,
 	formatterQueryParam,

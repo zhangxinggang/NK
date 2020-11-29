@@ -1,11 +1,11 @@
-import glob from 'glob'
-import path from 'path'
-import Router from 'koa-router'
-import koaMountRoutes from 'koa-mount-routes'
-import serve from 'koa-static-server'
+const glob = require('glob')
+const path = require('path')
+const Router = require('koa-router')
+const koaMountRoutes = require('koa-mount-routes')
+const serve = require('koa-static-server')
 
 const router = new Router();
-export default class Routers {
+class Routers {
 	constructor(options) {
 		options = options ? options : {};
 		Object.assign(this, options);
@@ -118,3 +118,4 @@ export default class Routers {
 		await next();
 	}
 }
+module.exports=Routers

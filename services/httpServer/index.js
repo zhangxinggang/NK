@@ -1,20 +1,20 @@
-import Koa from 'koa'
-import cors from 'koa2-cors'
-import bodyParser from 'koa-bodyparser'
-import compress from 'koa-compress'
-import helmet from 'koa-helmet'
-import proxy from 'koa-server-http-proxy'
-import http from 'http'
-import https from 'https'
-import fs from 'fs'
-import path from 'path'
-import favicon from 'koa-favicon'
-import Routers from './src/routes'
-import {verifyToken} from './src/authority'
-import {private_pkcs1,certificate} from './src/diffieHellman.js'
+const Koa = require('koa')
+const cors = require('koa2-cors')
+const bodyParser = require('koa-bodyparser')
+const compress = require('koa-compress')
+const helmet = require('koa-helmet')
+const proxy = require('koa-server-http-proxy')
+const http = require('http')
+const https = require('https')
+const fs = require('fs')
+const path = require('path')
+const favicon = require('koa-favicon')
+const Routers = require('./src/routes')
+const {verifyToken} = require('./src/authority')
+const {private_pkcs1,certificate} = require('./src/diffieHellman.js')
 const app = new Koa();
 app.env = process.env.NODE_ENV;
-export default class HttpServer {
+class HttpServer {
 	constructor(config){
 		this.config = config;
 		if(config.requireAlias){
@@ -89,3 +89,4 @@ export default class HttpServer {
 		})
 	}
 }
+module.exports=HttpServer

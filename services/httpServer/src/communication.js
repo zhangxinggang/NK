@@ -31,7 +31,7 @@
 		}
 	}
  */
-import nodemailer from 'nodemailer'
+const nodemailer = require('nodemailer')
 
 class Communication {
 	sendMail(options,cb){

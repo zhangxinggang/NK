@@ -1,4 +1,4 @@
-export default class UdpServer{
+class UdpServer{
     constructor(udpServer) {
         this.udpServer=udpServer;
     }
@@ -24,3 +24,4 @@ export default class UdpServer{
         }
     }
 }
+module.exports = UdpServer

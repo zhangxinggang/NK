@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken'
+const jwt = require('jsonwebtoken')
 
 let getToken=(playload,options)=>{
 	let security=NKGlobal.config.services.httpServer.security;
@@ -37,7 +37,7 @@ let verifyToken=async (ctx,next)=>{
 		}
 	}
 }
-export {
+module.exports = {
 	getToken,
 	getTempToken,
 	verifyToken
