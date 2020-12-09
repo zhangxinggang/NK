@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-
+const minimatch = require("minimatch")
 let getToken=(playload,options)=>{
 	let security=NKGlobal.config.services.httpServer.security;
 	let ops=Object.assign({expiresIn:security.tokenExpiresIn},options);
@@ -15,10 +15,10 @@ let verifyToken=async (ctx,next)=>{
 	let httpServer=NKGlobal.config.services.httpServer;
 	let reqUrl=ctx.request.url;
 	let security=httpServer.security;
-	let noAuthorityRoutes=security.noAuthorityRoutes.filter((item)=>{
-		return new RegExp(item).test(reqUrl)
+	let noAuth=security.noAuthorityRoutes.some((item)=>{
+		return minimatch(reqUrl,item)
 	});
-	if(noAuthorityRoutes.length>0){
+	if(noAuth){
 		await next();
 	}else{
 		let projectCookies=require('./cookies');

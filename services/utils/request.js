@@ -20,7 +20,7 @@ class Request {
                 Object.assign(opts,options)
             }
             if (opts.data) {
-                if (opts.method.toLowerCase === 'get') {
+                if (opts.method.toLowerCase() === 'get') {
                     opts.url += '?' + querystring.stringify(opts.data);
                 } else {
                     opts.data = JSON.stringify(opts.data)
@@ -58,14 +58,18 @@ class Request {
                         }
                         result = buffer.toString(opts.encoding)
                         if (opts.json) {
-                            result = JSON.parse(result)
+                            try{
+                                result = JSON.parse(result)
+                            }catch(e){
+                                reject(new Error(result))
+                            }
                         }
                     }
                     resolve(result)
                 })
             })
             req.on('error', reject)
-            if (opts.method.toLowerCase !== 'get' && opts.data) {
+            if (opts.method.toLowerCase() !== 'get' && opts.data) {
                 req.write(opts.data)
             }
             req.end()

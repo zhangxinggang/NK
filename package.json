@@ -8,7 +8,7 @@
     "dev": "npx nodemon --exec babel-node ./scripts/start.js",
     "build": "npx babel services --out-dir dist/services && npx babel scripts --out-dir dist/scripts && npx babel database --out-dir dist/database && npx babel config.js --out-dir dist  && npx babel package.json --copy-files --out-dir dist ",
     "start": "node ./dist/scripts/start.js",
-    "jsdoc":"npx jsdoc -a all -c \"./doc/jsDoc/conf.js\""
+    "jsdoc": "npx jsdoc -a all -c \"./doc/jsDoc/conf.js\""
   },
   "keywords": [
     "node",
@@ -81,8 +81,8 @@
     "koa-mount-routes": "^1.0.1",
     "koa-onerror": "^4.1.0",
     "koa-router": "^7.4.0",
+    "koa-send": "^5.0.1",
     "koa-server-http-proxy": "^0.1.0",
-    "koa-static-server": "^1.5.2",
     "koa2-cors": "^2.0.6",
     "log4js": "^6.3.0",
     "merge": "^1.2.1",

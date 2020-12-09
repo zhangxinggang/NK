@@ -17,16 +17,6 @@ app.env = process.env.NODE_ENV;
 class HttpServer {
 	constructor(config){
 		this.config = config;
-		if(config.requireAlias){
-			global.NKRequire=function(namespace,file){
-				var dir=config.requireAlias[namespace];
-				if(fs.existsSync(dir)){
-					return require(path.join(dir,file));
-				}else{
-					console.error(new Error('at config->services->httpServer->requireAlias not found '+namespace+'!'))
-				}
-			}
-		}
 	}
 	start(callback) {
 		if (!this.config.start) {
@@ -53,10 +43,15 @@ class HttpServer {
 			.use(bodyParser())
 			.use(helmet())
 			.use(cors());
-		app.use(routes.standardResponse).use(verifyToken);
-		routes.staticRoutes(app);
-		routes.mountRoutes(app);
-		app.use(routes.dynamicRoutes());
+		let authRouteCheck=(auth)=>{
+			routes.staticRoutes(app,auth);
+			routes.mountRoutes(app,auth);
+			routes.dynamicRoutes(app,auth);
+		}
+		app.use(routes.standardResponse);
+		authRouteCheck(false);
+		app.use(verifyToken);
+		authRouteCheck(true);
 		routes.routeIntercept();
 		let conf_http=this.config.protocols.http;
 		let conf_https=this.config.protocols.https;

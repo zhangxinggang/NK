@@ -2,39 +2,68 @@ const glob = require('glob')
 const path = require('path')
 const Router = require('koa-router')
 const koaMountRoutes = require('koa-mount-routes')
-const serve = require('koa-static-server')
-
-const router = new Router();
+const send = require('koa-send')
+const {normalizeSafe} = require('upath')
 class Routers {
 	constructor(options) {
 		options = options ? options : {};
 		Object.assign(this, options);
 	}
+	staticServe(opts){
+		opts = Object.assign({}, opts)
+		opts.root = path.resolve(opts.rootDir)
+		if (opts.index !== false) opts.index = opts.index || 'index.html'
+		const rootPath = normalizeSafe(opts.rootPath ? opts.rootPath + "/" : "/")
+		return async function serve (ctx, next) {
+			let done = false
+			if (ctx.method.toLowerCase() === 'head' || ctx.method.toLowerCase() === 'get') {
+				try {
+					done = await send(ctx, normalizeSafe(ctx.path.replace(rootPath, "/")), opts)
+				} catch (err) {
+					if (err.status !== 404) {
+						throw err
+					}
+				}
+			}
+			if (!done) {
+				await next()
+			}
+		}
+	}
 	formatterRootPath(item){
 		!item.rootPath && (item.rootPath = '/');
-		item.rootPath[0] != '/' && item.rootPath[0] != '\\' && (item.rootPath = '/' + item.rootPath);
+		item.rootPath = normalizeSafe('/' + item.rootPath)
 	}
-	staticRoutes(app){
+	authRouteCheck(item,auth,cb){
+		if((!auth && item.auth===false) || (auth && item.auth!=false)){
+			this.formatterRootPath(item)
+			cb()
+		}
+	}
+	staticRoutes(app,auth){
 		this.staticDirs=this.staticDirs || []
 		this.staticDirs.map(item=>{
-			this.formatterRootPath(item)
-			app.use(serve(item))
+			this.authRouteCheck(item,auth,()=>{
+				app.use(this.staticServe(item))
+			})
 		})
 	}
-	mountRoutes(app){
+	mountRoutes(app,auth){
 		this.mountRouteDirs=this.mountRouteDirs || []
 		this.mountRouteDirs.map((item)=>{
-			this.formatterRootPath(item)
-			item.urlPrefix=item.rootPath
-			delete item.rootPath
-			koaMountRoutes(app,item['rootDir'],item);
+			this.authRouteCheck(item,auth,()=>{
+				item.urlPrefix=item.rootPath
+				delete item.rootPath
+				koaMountRoutes(app,item['rootDir'],item);
+			})
 		})
 	}
-	dynamicRoutes() {
+	dynamicRoutes(app,auth) {
+		const router = new Router();
 		this.dynamicRouteDirs=this.dynamicRouteDirs || []
 		this.dynamicRouteDirs.map((item) => {
-			this.formatterRootPath(item)
-			glob.sync(path.join(item.rootDir, '/**/*.js'))
+			this.authRouteCheck(item,auth,()=>{
+				glob.sync(path.join(item.rootDir, '/**/*.js'))
 				.filter((oneJs) => oneJs.indexOf('.{m}.') > 0)
 				.map((filterRoute) => {
 					let routeType = filterRoute.match(/\{(.+?)\}/g).filter((type) => type != '{m}');
@@ -60,10 +89,12 @@ class Routers {
 						})
 					}
 				})
+			})
 		})
-		return router.routes();
+		router.stack.length>0 && (app.use(router.routes()))
 	}
 	routeIntercept(){
+		const router = new Router();
 		router.all('*',(ctx)=>{
 			ctx.throw(404,new Error('Not Found!'))
 			// ctx.formatError([404,'Not Found!'])
@@ -94,7 +125,6 @@ class Routers {
 					eMessage = status[1];
 				}
 			}else if(Object.prototype.toString.call(status)=='[object Error]'){
-				console.error(status)
 				eMessage=status.message;
 			}else if(Object.prototype.toString.call(status)=='[object Object]'){
 				eStatus=status['status'] || eStatus;

@@ -72,9 +72,9 @@ class Logger{
 		if(this.mailer){
 			console.info('[Email] reminder service started')
 			let mailLog=getLogger('mailer');
-			console.sendMail=mailLog.error.bind(mailLog)
+			console.mail=mailLog.error.bind(mailLog)
 		}else{
-			console.sendMail=function(){
+			console.mail=function(){
 				console.error('[Email] please open reminder service,config->communication->mailer->start')
 			}
 		}

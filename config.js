@@ -67,9 +67,6 @@ module.exports = {
 					rootPath:'private'
 				}]
 			},
-			requireAlias: {
-				"NK": path.join(__dirname, "./services/httpServer/src")
-			},
 			proxy: {
 				'/NKWeather': {
 					target: 'http://wthrcdn.etouch.cn/weather_mini',
@@ -82,6 +79,10 @@ module.exports = {
 				}
 			}
 		}
+	},
+	requireAlias: {
+		"NK": path.join(__dirname, "./services/utils"),
+		"NKH": path.join(__dirname, "./services/httpServer/src")
 	},
 	autoRunTask: {
 		start: true,
@@ -156,7 +157,7 @@ module.exports = {
 	},
 	project: {
 		name: "nk",
-		favIcon: path.join(__dirname, "./services/view/favIcon.ico")
+		favIcon: path.join(__dirname, "./services/server/view/favIcon.ico")
 	},
 	jsdoc: {
 		include: [path.join(__dirname,'./services')],

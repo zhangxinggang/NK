@@ -4,13 +4,7 @@ const glob = require("glob")
 const fs = require('fs')
 const merge = require('merge')
 const {currencyOperation} = require('./staticStandard')
-
-Object.defineProperty(global,'typeorm',{
-	value:typeorm,
-	writable:false,
-	enumerable:true,
-	configurable:false
-})
+$fixVal(global,'$typeorm',typeorm)
 const orm=NKGlobal.config.storage.orm;
 const ormPool={};
 const filterRuleKey={

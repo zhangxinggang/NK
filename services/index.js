@@ -1,34 +1,25 @@
 const dotenv = require('dotenv')
-//初始化环境变量
-dotenv.config()
-
-const logger = require('./utils/logger')
-const request = require('./utils/request')
 const glob = require('glob')
 const path = require('path')
 const merge = require('merge')
+//初始化环境变量，先执行
+dotenv.config()
+const logger = require('./utils/logger')
+const request = require('./utils/request')
 const config= require('../config') || {}
-//初始化
-let init=(config)=>{
-	!process.env.NODE_ENV && (process.env.NODE_ENV='production');
-	//将配置文件写进内存
-	global.NKGlobal = {config};
-	let fixVal=(originObj,newObjName,value)=>{
-		Object.defineProperty(originObj,newObjName,{
-			value:value,
-			writable:false,
-			enumerable:true,
-			configurable:false
-		})
-	}
-	fixVal(global,'$fixVal',fixVal)
-	//记录日志
-	new logger(config).init();
-	//网络请求
-	$fixVal(global,'$request',request)
-	//设置程序名称
-	process.title=(config.project && config.project.name) || 'nk';
-	//异常处理
+
+//变量不可修改
+let fixVal=(originObj,newObjName,value)=>{
+	Object.defineProperty(originObj,newObjName,{
+		value:value,
+		writable:false,
+		enumerable:true,
+		configurable:false
+	})
+}
+
+//异常处理
+let errorHanlder=()=>{
 	process.on('uncaughtException', (e) => {
 		console.error('uncaughtException:', e);
 	});
@@ -39,13 +30,35 @@ let init=(config)=>{
 		console.error('rejectionHandled:', e);
 	})
 }
-let endingWorks=(serverNames)=>{
+//初始化
+let init=(config)=>{
+	!process.env.NODE_ENV && (process.env.NODE_ENV='production');
+	//将配置文件写进内存
+	global.NKGlobal = {config};
+	if(config.requireAlias){
+		global.NKRequire=function(namespace,file){
+			var dir=config.requireAlias[namespace];
+			if(fs.existsSync(dir)){
+				return require(path.join(dir,file));
+			}else{
+				console.error(new Error('at config->requireAlias not found '+namespace+'!'))
+			}
+		}
+	}
+	fixVal(global,'$fixVal',fixVal)
+	//网络请求
+	$fixVal(global,'$request',request)
+	//记录日志
+	new logger(config).init();
+	//设置程序名称
+	process.title=(config.project && config.project.name) || 'nk';
+	errorHanlder()
+}
+let endingWorks=()=>{
 	let allPrerequisites=[];
-	serverNames.map(item=>{
-		let jsDirs=path.join(__dirname,item,'./prerequisite/**/*.js');
-		let prerequisitePreLoads=glob.sync(jsDirs,{cwd: __dirname});
-		prerequisitePreLoads.forEach(c =>allPrerequisites.push(require(c)()));
-	})
+	let jsDirs=path.join(__dirname,'./server/prerequisite/**/*.js');
+	let prerequisitePreLoads=glob.sync(jsDirs,{cwd: __dirname});
+	prerequisitePreLoads.forEach(c =>allPrerequisites.push(require(c)()));
 	Promise.all(allPrerequisites)
 	.then((value)=>{
 		let prerequisiteSuc=value.every((item)=>{return item});
@@ -76,11 +89,17 @@ module.exports=function(pcf) {
 			try{
 				var server = require('./'+item)
 				allService.push(new Promise((resolve, reject) => {
-					new server(serverConf).start(()=>{
-						resolve(item)
-					})
+					try{
+						new server(serverConf).start(()=>{
+							resolve(item)
+						})
+					}catch(e){
+						reject(e)
+					}
 				}))
-			}catch(e){}
+			}catch(e){
+				console.error(e)
+			}
 		}
 	})
 	Promise.all(allService).then(function(done) {
