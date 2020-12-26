@@ -46,8 +46,8 @@ module.exports = {
 				tokenExpiresIn: '8h',
 				noAuthorityRoutes: [
 					'/dynamic/*',
-					'/mount/*',
-					'/public/*'
+					'/mount/**',
+					'/public/**'
 				]
 			},
 			routes: {
@@ -65,17 +65,18 @@ module.exports = {
 				},{
 					rootDir:path.join(__dirname,'./demo/static/private'),
 					rootPath:'private'
-				}]
-			},
-			proxy: {
-				'/NKWeather': {
-					target: 'http://wthrcdn.etouch.cn/weather_mini',
-					//本地请求：http://127.0.0.1+port+/NKWeather?citykey=101010100等于访问http://wthrcdn.etouch.cn/weather_mini?citykey=101010100
-					// pathRewrite: {
-					// 	'^/api': ''
-					// },
-					changeOrigin: true, // target是域名的话，需要这个参数，
-					secure: false, // 设置支持https协议的代理
+				}],
+				proxyRoutes: {
+					'/NKWeather': {
+						target: 'http://wthrcdn.etouch.cn/weather_mini',
+						//本地请求：http://127.0.0.1+port+/NKWeather?citykey=101010100等于访问http://wthrcdn.etouch.cn/weather_mini?citykey=101010100
+						pathRewrite: {
+							'^/NKWeather': ''
+						},
+						changeOrigin: true, // target是域名的话，需要这个参数，
+						secure: false, // 设置支持https协议的代理
+						auth:false
+					}
 				}
 			}
 		}

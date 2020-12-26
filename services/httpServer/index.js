@@ -3,14 +3,11 @@ const cors = require('koa2-cors')
 const bodyParser = require('koa-bodyparser')
 const compress = require('koa-compress')
 const helmet = require('koa-helmet')
-const proxy = require('koa-server-http-proxy')
 const http = require('http')
 const https = require('https')
 const fs = require('fs')
-const path = require('path')
 const favicon = require('koa-favicon')
 const Routers = require('./src/routes')
-const {verifyToken} = require('./src/authority')
 const {private_pkcs1,certificate} = require('./src/diffieHellman.js')
 const app = new Koa();
 app.env = process.env.NODE_ENV;
@@ -25,12 +22,6 @@ class HttpServer {
 		}
 		// app.context.onerror = errorHandler;
 		NKGlobal.config.project && (app.use(favicon(NKGlobal.config.project.favIcon)));
-		if(this.config.proxy){
-			Object.keys(this.config.proxy).forEach((item)=>{
-				let options=this.config.proxy[item];
-				app.use(proxy(item,options))
-			})
-		}
 		const routes=new Routers({...this.config.routes});
 		app
 			.use(compress({
@@ -43,15 +34,13 @@ class HttpServer {
 			.use(bodyParser())
 			.use(helmet())
 			.use(cors());
-		let authRouteCheck=(auth)=>{
-			routes.staticRoutes(app,auth);
-			routes.mountRoutes(app,auth);
-			routes.dynamicRoutes(app,auth);
-		}
 		app.use(routes.standardResponse);
-		authRouteCheck(false);
-		app.use(verifyToken);
-		authRouteCheck(true);
+		routes.loadProxyRoutes();
+		routes.loadMountRoutes();
+		routes.loadDynamicRoutes();
+		routes.loadStaticRoutes();
+		routes.routeExistCheck(app);
+		routes.routeAuthCheck(app);
 		routes.routeIntercept();
 		let conf_http=this.config.protocols.http;
 		let conf_https=this.config.protocols.https;
